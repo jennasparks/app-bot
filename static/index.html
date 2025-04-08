@@ -1,0 +1,29 @@
+<!-- Frontend (index.html) -->
+<!DOCTYPE html>
+<html>
+<body>
+    <input id="meetingUrl" placeholder="Enter Google Meet URL">
+    <button onclick="startBot()">Start Transcription</button>
+    <div id="transcript" style="white-space: pre-wrap; border: 1px solid black; padding: 10px; margin-top: 20px;"></div>
+
+    <script>
+        async function startBot() {
+            const meetingUrl = document.getElementById('meetingUrl').value;
+            const response = await fetch('/start_bot', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({meeting_url: meetingUrl})
+            });
+
+            const { bot_id } = await response.json();
+            console.log("Bot ID:", bot_id);
+
+            const ws = new WebSocket(`ws://127.0.0.1:8000/transcript/${bot_id}`);
+            
+            ws.onmessage = (event) => {
+                document.getElementById('transcript').textContent += event.data + '\n';
+            };
+        }
+    </script>
+</body>
+</html>
